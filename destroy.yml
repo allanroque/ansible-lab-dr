@@ -7,6 +7,7 @@
 - name: Destroy AWS infrastructure with Terraform
   hosts: localhost
   gather_facts: false
+  vars_files: vars/vars.yml
 
   tasks:
     - name: Destroy Terraform-managed resources
