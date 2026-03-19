@@ -1,0 +1,50 @@
+---
+# ============================================================================
+# Playbook: provision.yml
+# Provisions RHEL EC2 instances on AWS using Terraform via Ansible
+# ============================================================================
+
+- name: Provision AWS infrastructure with Terraform
+  hosts: local
+  gather_facts: false
+  vars_files: vars/vars.yml
+
+  pre_tasks:
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - aws_region is defined
+          - aws_name_tag is defined
+          - aws_instance_size is defined
+          - aws_instance_count is defined
+          - aws_instance_public_key is defined
+        fail_msg: >-
+          Missing required variables. Check group_vars/all/vars.yml
+          or pass them via --extra-vars.
+
+  roles:
+    - provision_aws
+
+# ============================================================================
+# Post-provision: validate connectivity to new instances
+# ============================================================================
+
+- name: Validate provisioned RHEL instances
+  hosts: provisioned_servers
+  gather_facts: true
+  become: false
+
+  tasks:
+    - name: Gather OS information
+      ansible.builtin.debug:
+        msg: >-
+          Host {{ inventory_hostname }} is running
+          {{ ansible_distribution }} {{ ansible_distribution_version }}
+          (kernel {{ ansible_kernel }})
+
+    - name: Verify RHEL distribution
+      ansible.builtin.assert:
+        that:
+          - ansible_distribution == "RedHat"
+        fail_msg: "Expected RHEL but found {{ ansible_distribution }}"
+        success_msg: "Confirmed RHEL instance"

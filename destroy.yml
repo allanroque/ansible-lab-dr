@@ -1,0 +1,30 @@
+---
+# ============================================================================
+# Playbook: destroy.yml
+# Destroys all AWS infrastructure previously created by Terraform
+# ============================================================================
+
+- name: Destroy AWS infrastructure with Terraform
+  hosts: local
+  gather_facts: false
+
+  tasks:
+    - name: Destroy Terraform-managed resources
+      community.general.terraform:
+        project_path: "{{ terraform_project_dir }}"
+        state: absent
+        binary_path: "{{ terraform_binary | default(omit) }}"
+        variables:
+          aws_region: "{{ aws_region }}"
+          aws_name_tag: "{{ aws_name_tag }}"
+          aws_instance_size: "{{ aws_instance_size }}"
+          aws_instance_count: "{{ aws_instance_count | string }}"
+          aws_instance_public_key: "{{ aws_instance_public_key }}"
+      environment:
+        AWS_ACCESS_KEY_ID: "{{ aws_access_key_id }}"
+        AWS_SECRET_ACCESS_KEY: "{{ aws_secret_access_key }}"
+      register: terraform_destroy
+
+    - name: Confirm destruction
+      ansible.builtin.debug:
+        msg: "All Terraform-managed AWS resources have been destroyed."
