@@ -1,0 +1,111 @@
+---
+# ============================================================================
+# Role: deploy_database
+# Installs and configures PostgreSQL on RHEL 9
+# ============================================================================
+
+- name: Install PostgreSQL server
+  ansible.builtin.dnf:
+    name:
+      - postgresql-server
+      - postgresql
+      - python3-psycopg2
+    state: present
+
+- name: Check if PostgreSQL is initialized
+  ansible.builtin.stat:
+    path: /var/lib/pgsql/data/PG_VERSION
+  register: pg_data
+
+- name: Initialize PostgreSQL database
+  ansible.builtin.command:
+    cmd: postgresql-setup --initdb
+  when: not pg_data.stat.exists
+  changed_when: true
+
+- name: Configure PostgreSQL to listen on all interfaces
+  ansible.builtin.lineinfile:
+    path: /var/lib/pgsql/data/postgresql.conf
+    regexp: "^#?listen_addresses"
+    line: "listen_addresses = '*'"
+  notify: Restart PostgreSQL
+
+- name: Configure PostgreSQL port
+  ansible.builtin.lineinfile:
+    path: /var/lib/pgsql/data/postgresql.conf
+    regexp: "^#?port"
+    line: "port = {{ db_port }}"
+  notify: Restart PostgreSQL
+
+- name: Deploy pg_hba.conf for remote access
+  ansible.builtin.template:
+    src: pg_hba.conf.j2
+    dest: /var/lib/pgsql/data/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: "0600"
+  notify: Restart PostgreSQL
+
+- name: Enable and start PostgreSQL
+  ansible.builtin.systemd:
+    name: postgresql
+    enabled: true
+    state: started
+
+- name: Flush handlers to apply config changes
+  ansible.builtin.meta: flush_handlers
+
+- name: Create application database
+  community.postgresql.postgresql_db:
+    name: "{{ db_name }}"
+    state: present
+  become: true
+  become_user: postgres
+
+- name: Create application user
+  community.postgresql.postgresql_user:
+    db: "{{ db_name }}"
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: ALL
+    state: present
+  become: true
+  become_user: postgres
+
+- name: Grant all privileges on database to app user
+  community.postgresql.postgresql_privs:
+    db: "{{ db_name }}"
+    role: "{{ db_user }}"
+    type: database
+    privs: ALL
+    state: present
+  become: true
+  become_user: postgres
+
+- name: Deploy initial data SQL script
+  ansible.builtin.template:
+    src: init_data.sql.j2
+    dest: /tmp/init_data.sql
+    mode: "0644"
+
+- name: Populate database with initial data
+  community.postgresql.postgresql_script:
+    db: "{{ db_name }}"
+    path: /tmp/init_data.sql
+  become: true
+  become_user: postgres
+  register: db_populate
+  changed_when: db_populate.status_message == 'INSERT 0 1' or db_populate.changed
+
+- name: Remove temporary SQL file
+  ansible.builtin.file:
+    path: /tmp/init_data.sql
+    state: absent
+
+- name: Open PostgreSQL port in firewall
+  ansible.posix.firewalld:
+    port: "{{ db_port }}/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  ignore_errors: true

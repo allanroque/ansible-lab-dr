@@ -1,0 +1,25 @@
+---
+# ============================================================================
+# Playbook: deploy-database.yml
+# Deploys PostgreSQL database server with initial data
+# ============================================================================
+
+- name: Deploy PostgreSQL database
+  hosts: "{{ target_host }}"
+  become: true
+  vars_files: vars/vars.yml
+
+  pre_tasks:
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - db_name is defined
+          - db_user is defined
+          - db_password is defined
+          - db_port is defined
+        fail_msg: >-
+          Missing required database variables. Check vars/vars.yml
+          or pass them via --extra-vars.
+
+  roles:
+    - deploy_database

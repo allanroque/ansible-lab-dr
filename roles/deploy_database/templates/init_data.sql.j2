@@ -1,0 +1,73 @@
+-- ============================================================================
+-- Initial data for 3-tier application
+-- ============================================================================
+
+-- Categories
+CREATE TABLE IF NOT EXISTS categories (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT
+);
+
+-- Products
+CREATE TABLE IF NOT EXISTS products (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    description TEXT,
+    price DECIMAL(10,2) NOT NULL,
+    category_id INTEGER REFERENCES categories(id),
+    stock INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Orders
+CREATE TABLE IF NOT EXISTS orders (
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER REFERENCES products(id),
+    quantity INTEGER NOT NULL,
+    total DECIMAL(10,2) NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert categories
+INSERT INTO categories (name, description) VALUES
+    ('Electronics', 'Electronic devices and accessories'),
+    ('Books', 'Physical and digital books'),
+    ('Clothing', 'Apparel and fashion items'),
+    ('Home & Garden', 'Home improvement and garden supplies'),
+    ('Sports', 'Sports equipment and accessories')
+ON CONFLICT DO NOTHING;
+
+-- Insert products
+INSERT INTO products (name, description, price, category_id, stock) VALUES
+    ('Wireless Mouse', 'Ergonomic wireless mouse with USB receiver', 29.99, 1, 150),
+    ('Mechanical Keyboard', 'RGB mechanical keyboard with blue switches', 79.99, 1, 75),
+    ('USB-C Hub', '7-in-1 USB-C hub with HDMI and ethernet', 49.99, 1, 200),
+    ('Monitor Stand', 'Adjustable aluminum monitor stand', 39.99, 1, 100),
+    ('Linux Administration', 'Complete guide to Linux system administration', 44.99, 2, 50),
+    ('Python Cookbook', 'Recipes for mastering Python programming', 39.99, 2, 80),
+    ('Ansible for DevOps', 'Server automation with Ansible', 35.99, 2, 60),
+    ('Docker T-Shirt', 'Official Docker whale logo t-shirt', 24.99, 3, 300),
+    ('DevOps Hoodie', 'Comfortable hoodie for late night deployments', 49.99, 3, 120),
+    ('Kubernetes Cap', 'Baseball cap with Kubernetes helm logo', 19.99, 3, 200),
+    ('Standing Desk Mat', 'Anti-fatigue mat for standing desks', 34.99, 4, 90),
+    ('Desk Lamp', 'LED desk lamp with adjustable brightness', 27.99, 4, 110),
+    ('Cable Organizer', 'Desktop cable management system', 14.99, 4, 250),
+    ('Yoga Mat', 'Non-slip exercise yoga mat', 22.99, 5, 180),
+    ('Water Bottle', 'Insulated stainless steel water bottle 750ml', 18.99, 5, 400)
+ON CONFLICT DO NOTHING;
+
+-- Insert orders
+INSERT INTO orders (product_id, quantity, total, status, created_at) VALUES
+    (1, 2, 59.98, 'completed', CURRENT_TIMESTAMP - INTERVAL '10 days'),
+    (3, 1, 49.99, 'completed', CURRENT_TIMESTAMP - INTERVAL '9 days'),
+    (5, 3, 134.97, 'completed', CURRENT_TIMESTAMP - INTERVAL '8 days'),
+    (2, 1, 79.99, 'shipped', CURRENT_TIMESTAMP - INTERVAL '5 days'),
+    (7, 2, 71.98, 'shipped', CURRENT_TIMESTAMP - INTERVAL '4 days'),
+    (8, 5, 124.95, 'processing', CURRENT_TIMESTAMP - INTERVAL '3 days'),
+    (10, 3, 59.97, 'processing', CURRENT_TIMESTAMP - INTERVAL '2 days'),
+    (12, 1, 27.99, 'pending', CURRENT_TIMESTAMP - INTERVAL '1 day'),
+    (14, 2, 45.98, 'pending', CURRENT_TIMESTAMP - INTERVAL '12 hours'),
+    (15, 4, 75.96, 'pending', CURRENT_TIMESTAMP - INTERVAL '6 hours')
+ON CONFLICT DO NOTHING;

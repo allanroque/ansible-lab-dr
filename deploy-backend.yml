@@ -1,0 +1,26 @@
+---
+# ============================================================================
+# Playbook: deploy-backend.yml
+# Deploys Node.js Express API backend
+# ============================================================================
+
+- name: Deploy Node.js backend API
+  hosts: "{{ target_host }}"
+  become: true
+  vars_files: vars/vars.yml
+
+  pre_tasks:
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - db_host is defined
+          - db_name is defined
+          - db_user is defined
+          - db_password is defined
+          - app_port is defined
+        fail_msg: >-
+          Missing required backend variables. Ensure db_host is set
+          to the database server IP via --extra-vars.
+
+  roles:
+    - deploy_backend

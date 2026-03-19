@@ -25,3 +25,14 @@ s3_backend_bucket: "terraform-state-{{ aws_name_tag }}"
 s3_backend_key: "ansible-lab-dr/terraform.tfstate"
 s3_backend_region: "{{ aws_region }}"
 dynamodb_lock_table: "terraform-lock-{{ aws_name_tag }}"
+
+# ============================================================================
+# Application - 3 tier (Database / Backend / Frontend)
+# ============================================================================
+
+db_name: appdb
+db_user: appuser
+db_password: AppP@ss2024
+db_port: 5432
+app_port: 3000
+backend_port: 3000

@@ -1,0 +1,72 @@
+---
+# ============================================================================
+# Role: deploy_backend
+# Installs Node.js and deploys Express API application
+# ============================================================================
+
+- name: Install Node.js from AppStream
+  ansible.builtin.dnf:
+    name:
+      - nodejs
+      - npm
+    state: present
+
+- name: Create application directory
+  ansible.builtin.file:
+    path: /opt/app-backend
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Deploy package.json
+  ansible.builtin.template:
+    src: package.json.j2
+    dest: /opt/app-backend/package.json
+    mode: "0644"
+  notify: Restart backend
+
+- name: Deploy application code
+  ansible.builtin.template:
+    src: app.js.j2
+    dest: /opt/app-backend/app.js
+    mode: "0644"
+  notify: Restart backend
+
+- name: Install npm dependencies
+  community.general.npm:
+    path: /opt/app-backend
+    state: present
+
+- name: Deploy systemd service
+  ansible.builtin.template:
+    src: backend.service.j2
+    dest: /etc/systemd/system/app-backend.service
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart backend
+
+- name: Enable and start backend service
+  ansible.builtin.systemd:
+    name: app-backend
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Open application port in firewall
+  ansible.posix.firewalld:
+    port: "{{ app_port }}/tcp"
+    permanent: true
+    immediate: true
+    state: enabled
+  ignore_errors: true
+
+- name: Wait for backend to be ready
+  ansible.builtin.uri:
+    url: "http://localhost:{{ app_port }}/api/health"
+    status_code: 200
+  register: health_check
+  retries: 10
+  delay: 3
+  until: health_check.status == 200

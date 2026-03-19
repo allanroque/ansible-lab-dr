@@ -1,0 +1,22 @@
+---
+# ============================================================================
+# Playbook: deploy-frontend.yml
+# Deploys Nginx frontend with dashboard application
+# ============================================================================
+
+- name: Deploy Nginx frontend
+  hosts: "{{ target_host }}"
+  become: true
+  vars_files: vars/vars.yml
+
+  pre_tasks:
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - backend_host is defined
+        fail_msg: >-
+          Missing required frontend variables. Ensure backend_host is set
+          to the backend server IP via --extra-vars.
+
+  roles:
+    - deploy_frontend
