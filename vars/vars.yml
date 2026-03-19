@@ -16,3 +16,12 @@ aws_instance_public_key:
 terraform_project_dir: "{{ playbook_dir }}/terraform"
 terraform_state_dir: "{{ terraform_project_dir }}"
 terraform_binary: terraform
+
+# ============================================================================
+# S3 Backend for Terraform remote state
+# ============================================================================
+
+s3_backend_bucket: "terraform-state-{{ aws_name_tag }}"
+s3_backend_key: "ansible-lab-dr/terraform.tfstate"
+s3_backend_region: "{{ aws_region }}"
+dynamodb_lock_table: "terraform-lock-{{ aws_name_tag }}"
