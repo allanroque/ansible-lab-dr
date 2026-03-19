@@ -93,7 +93,7 @@
   become: true
   become_user: postgres
   register: db_populate
-  changed_when: db_populate.status_message == 'INSERT 0 1' or db_populate.changed
+  changed_when: "'INSERT' in db_populate.statusmessage | default('')"
 
 - name: Remove temporary SQL file
   ansible.builtin.file:
