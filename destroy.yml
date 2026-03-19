@@ -14,6 +14,7 @@
       community.general.terraform:
         project_path: "{{ terraform_project_dir }}"
         state: absent
+        force_init: true
         binary_path: "{{ terraform_binary | default(omit) }}"
         variables:
           aws_region: "{{ aws_region }}"
