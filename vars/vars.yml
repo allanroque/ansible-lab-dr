@@ -1,0 +1,18 @@
+---
+# ============================================================================
+# AWS / Terraform variables
+# ============================================================================
+
+aws_region: us-east-2
+aws_name_tag: ansible
+aws_instance_size: t2.micro
+aws_instance_count: 3
+aws_instance_public_key:
+
+# ============================================================================
+# Terraform configuration
+# ============================================================================
+
+terraform_project_dir: "{{ playbook_dir }}/terraform"
+terraform_state_dir: "{{ terraform_project_dir }}"
+terraform_binary: terraform

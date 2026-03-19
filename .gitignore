@@ -5,6 +5,5 @@
 crash.log
 terraform.tfvars
 vars/aws.yml
-vars/vars.yml
 ansible-navigator.log
 .claude/
