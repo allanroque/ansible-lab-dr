@@ -33,6 +33,7 @@
       aws_name_tag: "{{ aws_name_tag }}"
       aws_instance_size: "{{ aws_instance_size }}"
       aws_instance_count: "{{ aws_instance_count | string }}"
+      aws_instance_name: "{{ aws_instance_name }}"
       aws_instance_public_key: "{{ aws_instance_public_key }}"
   register: terraform_result
 

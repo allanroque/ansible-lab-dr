@@ -185,6 +185,6 @@ resource "aws_instance" "rhel" {
   }
 
   tags = {
-    Name = format("server%02d", count.index + 1)
+    Name = format("%s%02d", var.aws_instance_name, count.index + 1)
   }
 }

@@ -22,6 +22,12 @@ variable "aws_instance_count" {
   default     = 3
 }
 
+variable "aws_instance_name" {
+  description = "Prefix name for EC2 instances (e.g. 'linux' creates linux01, linux02...)"
+  type        = string
+  default     = "server"
+}
+
 variable "aws_instance_public_key" {
   description = "SSH public key for instance access"
   type        = string
