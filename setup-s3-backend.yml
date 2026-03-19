@@ -10,6 +10,15 @@
   vars_files: vars/vars.yml
 
   pre_tasks:
+    - name: Get AWS account ID
+      amazon.aws.aws_caller_info:
+      register: caller_info
+
+    - name: Set unique bucket and table names using account ID
+      ansible.builtin.set_fact:
+        s3_backend_bucket: "terraform-state-{{ aws_name_tag }}-{{ caller_info.account }}"
+        dynamodb_lock_table: "terraform-lock-{{ aws_name_tag }}-{{ caller_info.account }}"
+
     - name: Validate required variables
       ansible.builtin.assert:
         that:
