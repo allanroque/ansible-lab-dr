@@ -16,6 +16,12 @@
         state: absent
         force_init: true
         binary_path: "{{ terraform_binary | default(omit) }}"
+        backend_config:
+          bucket: "{{ s3_backend_bucket }}"
+          key: "{{ s3_backend_key }}"
+          region: "{{ s3_backend_region }}"
+          dynamodb_table: "{{ dynamodb_lock_table }}"
+          encrypt: "true"
         variables:
           aws_region: "{{ aws_region }}"
           aws_name_tag: "{{ aws_name_tag }}"
