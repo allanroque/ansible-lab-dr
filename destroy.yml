@@ -5,7 +5,7 @@
 # ============================================================================
 
 - name: Destroy AWS infrastructure with Terraform
-  hosts: local
+  hosts: localhost
   gather_facts: false
 
   tasks:

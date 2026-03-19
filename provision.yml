@@ -5,7 +5,7 @@
 # ============================================================================
 
 - name: Provision AWS infrastructure with Terraform
-  hosts: local
+  hosts: localhost
   gather_facts: false
   vars_files: vars/vars.yml
 
